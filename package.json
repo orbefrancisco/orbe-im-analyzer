@@ -1,0 +1,16 @@
+{
+  "name": "orbe-im-analyzer",
+  "version": "1.0.0",
+  "description": "Analizador científico de intermodulación radioeléctrica (local-first, sin dependencias en tiempo de ejecución)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/sw.mjs",
+    "build:test": "tsc -p tsconfig.test.json",
+    "test": "npm run build && npm run build:test && node --test .build-test/tests/ tests/ui/",
+    "serve": "python3 -m http.server 8080 --bind 127.0.0.1 --directory web"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

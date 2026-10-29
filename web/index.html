@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Orbe IM Analyzer — analizador científico de intermodulación</title>
+  <meta name="theme-color" content="#0B1A33">
+  <meta name="description" content="Analizador científico de intermodulación radioeléctrica en la banda FM. Todo se procesa en el dispositivo.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icono.svg" type="image/svg+xml">
+  <link rel="icon" href="icono-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" href="icono-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Orbe IM">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="js/ui/main.js"></script>
+</head>
+<body class="viz-root">
+  <header class="app-header">
+    <div class="brand">
+      <h1>Orbe IM Analyzer</h1>
+      <span class="sub">Analizador científico de intermodulación radioeléctrica</span>
+      <span id="pwa" class="pwa"></span>
+    </div>
+    <div id="project-bar" class="project-bar"></div>
+    <nav id="tabs" class="tabs" role="tablist" aria-label="Secciones"></nav>
+  </header>
+  <noscript><p class="banner bad">Esta aplicación necesita JavaScript.</p></noscript>
+  <main>
+    <section id="sec-calculadora" aria-label="Calculadora"></section>
+    <section id="sec-analizador" aria-label="Analizador de banda" hidden></section>
+    <section id="sec-auditoria" aria-label="Auditoría espectral" hidden></section>
+    <section id="sec-laboratorio" aria-label="Laboratorio RF" hidden></section>
+    <section id="sec-metodo" aria-label="Método y limitaciones" hidden>
+      <div class="section-intro">
+        <h2>Método y limitaciones</h2>
+        <p><strong>Criterio fundamental:</strong> producto matemáticamente posible ≠ señal observada ≠ producto de intermodulación experimentalmente confirmado.</p>
+      </div>
+      <div class="card prose">
+        <h3>1. Motor matemático</h3>
+        <p>Para N frecuencias generadoras f<sub>i</sub> se enumeran todos los vectores de coeficientes enteros m = (m<sub>1</sub>, …, m<sub>N</sub>) con orden nominal n = Σ|m<sub>i</sub>| entre el mínimo y el máximo elegidos y con, como mucho, el número indicado de componentes no nulas. Cada vector produce f<sub>IM</sub> = |Σ m<sub>i</sub> f<sub>i</sub>|. Como m y −m dan la misma frecuencia, solo se conserva un representante (el de suma positiva). No se usan fórmulas de dos tonos: los productos clásicos 2f<sub>1</sub>−f<sub>2</sub>, 3f<sub>1</sub>−2f<sub>2</sub>… salen como casos particulares.</p>
+        <p><strong>Clasificación del producto.</strong> Armónico puro: un solo generador (k·f<sub>i</sub>, «H<i>k</i>»). IM de suma: todos los coeficientes positivos. IM de diferencia: coeficientes de ambos signos. La columna Σm (suma algebraica de coeficientes) indica cuántas veces «cae» el producto cerca de la banda de los generadores: en FM, los productos dentro de 88–108 MHz con generadores de la misma banda tienen Σm = 1 y, por tanto, orden impar.</p>
+        <h3>2. Representación exacta</h3>
+        <p>Toda frecuencia se guarda como un entero en hercios (resolución 1 Hz). El texto «89.30» se convierte con aritmética decimal entera, sin pasar por coma flotante, a 89 300 000 Hz. Las sumas Σ m<sub>i</sub> f<sub>i</sub> son exactas (los enteros de IEEE-754 son exactos hasta 2<sup>53</sup>), de modo que 100.1 + 100.3 y 2·100.2 son la misma frecuencia y las comparaciones con la tolerancia son exactas e inclusivas (89.85 coincide con 89.86 a ±10 kHz, no a ±9.999 kHz). Los datos con más precisión que 1 Hz se redondean y se avisa.</p>
+        <h3>3. Exhaustividad y complejidad</h3>
+        <p>Antes de calcular se cuenta exactamente el espacio de búsqueda: Σ<sub>k</sub> C(N,k)·2<sup>k−1</sup>·Σ<sub>s</sub> C(s−1,k−1). La enumeración es una búsqueda en profundidad con poda conservadora: si con el orden restante r y la mayor frecuencia restante F* la suma parcial S no puede llegar al intervalo de salida (|S ± r·F*| fuera de él), la rama se descarta sin perder productos válidos. Si se agota el presupuesto de trabajo o el límite de combinaciones, el resultado se declara <strong>INCOMPLETO — NO EXHAUSTIVO</strong>. Un cálculo cancelado se descarta entero.</p>
+        <h3>4. Orden nominal y orden físico</h3>
+        <p>El orden mostrado es el algebraico nominal. En un dispositivo real, la misma frecuencia recibe contribuciones de órdenes n+2, n+4… (por ejemplo, 2f<sub>1</sub>−f<sub>2</sub> también aparece en la expansión de 5.º orden como f<sub>1</sub>+f<sub>1</sub>−f<sub>2</sub>+f<sub>1</sub>−f<sub>1</sub>). Además, vectores distintos pueden coincidir exactamente (frecuencias equiespaciadas). Por eso un «IM5» no es necesariamente de origen exclusivamente quíntico, y todas las combinaciones de una frecuencia se listan juntas.</p>
+        <h3>5. Comparación con mediciones (clases A–D)</h3>
+        <ul>
+          <li><strong>A · Producto teórico</strong>: existe matemáticamente; ninguna señal medida dentro de la tolerancia.</li>
+          <li><strong>B · Coincidencia observada</strong>: hay una señal medida a |Δf| ≤ tolerancia. No es confirmación.</li>
+          <li><strong>C · Candidato experimental</strong>: B más al menos una evidencia documentada compatible y ninguna incompatible.</li>
+          <li><strong>D · Producto confirmado</strong>: C más confirmación explícita y justificada del analista, evidencia fuerte (desaparece al apagar un generador, o contiene su modulación) o dos evidencias compatibles de tipos distintos, y todos los generadores declarados «portadora confirmada».</li>
+        </ul>
+        <p>El programa calcula la <strong>probabilidad de coincidencia fortuita</strong>: la fracción de la banda cubierta por las ventanas ±tolerancia de todos los productos. Si es alta, una coincidencia de frecuencia aporta poca evidencia. Nunca reclasifica una frecuencia sospechosa como portadora.</p>
+        <h3>6. Pruebas de atenuación</h3>
+        <p>En pequeña señal, un producto generado tras el atenuador baja ΔP<sub>IM</sub> = Σ|m<sub>i</sub>|·ΔP<sub>i</sub> (n·A con atenuación uniforme); una señal que llega ya formada (IM externa, señal independiente, fuga por selectividad, imagen) baja A. La comparación usa incertidumbres combinadas con k = 2, avisa cuando la prueba no discrimina, cuando la lectura está a menos de 3 dB del ruido (cota inferior) y cuando los generadores no siguen al atenuador (compresión, AGC). Estas pendientes no son aplicables fuera de sus hipótesis.</p>
+        <h3>7. Limitaciones</h3>
+        <ul>
+          <li>No se estiman potencias de productos: calculable no significa detectable.</li>
+          <li>Fuera del alcance configurado puede haber otras explicaciones; una señal sin coincidencias no queda descartada.</li>
+          <li>El formato nativo de SCORPIO no es público: se importan exportaciones CSV/XLSX; revise el mapeo de columnas y unidades que muestra el informe de importación.</li>
+          <li>Los niveles en dBµV se convierten a dBm suponiendo 50 Ω; los de campo (dBµV/m) o potencia de transmisor (kW) se guardan como texto.</li>
+          <li>El análisis de mecanismos indica compatibilidad con los datos, no un diagnóstico, y nunca atribuye una emisión a un transmisor.</li>
+        </ul>
+        <h3>8. Privacidad</h3>
+        <p>Todo el cálculo se realiza en este navegador. Los proyectos se guardan en el almacenamiento local del navegador; ningún dato se envía a servidores.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="app-footer"><span id="version"></span></footer>
+</body>
+</html>
