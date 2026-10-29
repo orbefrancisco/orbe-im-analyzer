@@ -22,13 +22,29 @@ python3 -m http.server 8080 --bind 127.0.0.1 --directory web
 
 ```bash
 npm install          # instala TypeScript (única dependencia, solo de desarrollo)
-npm test             # compila la app (y regenera sw.js) y las pruebas, y ejecuta las 56 pruebas
+npm test             # compila la app (y regenera sw.js) y las pruebas, y ejecuta todas las pruebas
 node scripts/demo.mjs                       # demostración del caso obligatorio en consola
 python3 -I tests/reference/brute_force.py   # referencia independiente (Python, fracciones exactas)
 python3 -I tests/ui/capturas.py             # capturas con Chrome sin ventana (requiere Chrome)
 ```
 
-## Secciones
+## Sistema nacional de vigilancia (v2)
+
+Plataforma geográfica para las ocho estaciones fijas de monitoreo de República Dominicana. No está conectada a las estaciones: los datos se introducen a mano o se importan (CSV, XLSX, JSON; exportaciones de SCORPIO). Todo se guarda en IndexedDB, en el navegador.
+
+| Sección | Qué hace |
+|---|---|
+| **Panel nacional** | Mapa real (32 divisiones, 8 estaciones, 8 regiones configurables), vistas por región, datos registrados y coincidencias IM; ficha de estación con los ocho apartados; reasignación de provincias y municipios con historial; resumen nacional; frecuencias bajo investigación. |
+| **Estación** | Ficha técnica editable (con verificación de coordenadas), inventario radioeléctrico con cinco estados, historial y anulación sin borrado, importación masiva con vista previa, barridos, análisis IM de la estación, informe de hallazgos, puente con Auditoría espectral y Laboratorio RF. |
+| **Investigador IM** | «Investigar frecuencia» (observaciones, combinaciones, estaciones, Δ en Hz y kHz, coexistencia, mecanismos físicos y mediciones necesarias); análisis por estación, región o nacional (exploratorio); modo comparativo entre estaciones. |
+| **Espectro RF** | Marcadores de las frecuencias del ámbito (sin trazas inventadas) y barridos importados con sus niveles. |
+| **Base de datos** | Estado, copia de seguridad con SHA-256 y restauración atómica, datos de ejemplo simulados, ajustes, fuentes y registro de auditoría. |
+
+Datos geográficos: `web/data/rd-provincias.json` y `web/data/rd-municipios.json`, generados con `python3 -I scripts/cartografia.py` a partir de geoBoundaries (provincias: Natural Earth, dominio público; municipios: Caribbean GeoPortal, CC BY 4.0), con la procedencia y el SHA-256 de los originales dentro de cada archivo.
+
+Motor nacional: `src/engine/geo.ts` (localización), `national.ts` (entidades, semillas, operaciones con auditoría), `national-analysis.ts` (ámbitos, coexistencia, investigador, comparación, informe), `national-io.ts` (importación, copia de seguridad, saneamiento). El motor de vectores enteros, el Laboratorio RF, la clasificación A–D y los importadores y exportadores anteriores se reutilizan sin cambios.
+
+## Secciones clásicas
 
 | Sección | Qué hace |
 |---|---|

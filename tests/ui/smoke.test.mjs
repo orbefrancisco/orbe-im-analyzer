@@ -2,10 +2,11 @@
 // Recorre las cuatro secciones con el caso obligatorio y verifica textos, flujos y exportaciones.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { installDom, find, findAll, tick } from './dom-shim.mjs';
+import { installDom, find, findAll, tick, SECTION_IDS } from './dom-shim.mjs';
 
 const { document, body, downloads, FakeElement } = installDom();
-for (const id of ['project-bar', 'tabs', 'sec-calculadora', 'sec-analizador', 'sec-auditoria', 'sec-laboratorio', 'sec-metodo', 'version', 'pwa']) {
+location.hash = '#calculadora'; // desde la v2 la pestaña inicial es el Panel nacional
+for (const id of SECTION_IDS) {
   const el = new FakeElement(id === 'tabs' ? 'nav' : 'section');
   el.setAttribute('id', id);
   body.appendChild(el);

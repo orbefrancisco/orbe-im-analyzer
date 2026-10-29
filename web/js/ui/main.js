@@ -6,12 +6,24 @@ import { calculatorView } from './calculator.js';
 import { $, download, h, mount, pickFile, select, stamp, toast } from './dom.js';
 import { labView } from './lab.js';
 import { setupPwa } from './pwa.js';
+import { databaseView } from './database.js';
+import { investigatorView } from './investigator.js';
+import { nat } from './natstore.js';
+import { nationalView } from './national.js';
+import { installClassicSync } from './scope.js';
+import { spectrumView } from './spectrumrf.js';
+import { stationView } from './station.js';
 import { store } from './state.js';
 const TABS = [
+    { id: 'nacional', label: 'Panel nacional' },
+    { id: 'estacion', label: 'Estación' },
+    { id: 'investigador', label: 'Investigador IM' },
+    { id: 'espectro', label: 'Espectro RF' },
     { id: 'calculadora', label: 'Calculadora' },
     { id: 'analizador', label: 'Analizador de banda' },
     { id: 'auditoria', label: 'Auditoría espectral' },
     { id: 'laboratorio', label: 'Laboratorio RF' },
+    { id: 'basedatos', label: 'Base de datos' },
     { id: 'metodo', label: 'Método y limitaciones' },
 ];
 function exampleProject() {
@@ -35,11 +47,16 @@ function exampleProject() {
 }
 function boot() {
     store.loadCurrent();
-    let active = location.hash.slice(1) || 'calculadora';
+    let active = location.hash.slice(1) || 'nacional';
     if (!TABS.some((t) => t.id === active))
-        active = 'calculadora';
+        active = 'nacional';
     const nav = $('#tabs');
     const sections = {
+        nacional: $('#sec-nacional'),
+        estacion: $('#sec-estacion'),
+        investigador: $('#sec-investigador'),
+        espectro: $('#sec-espectro'),
+        basedatos: $('#sec-basedatos'),
         calculadora: $('#sec-calculadora'),
         analizador: $('#sec-analizador'),
         auditoria: $('#sec-auditoria'),
@@ -51,7 +68,19 @@ function boot() {
     const ana = analyzerView(sections.analizador);
     const lab = labView(sections.laboratorio);
     const aud = auditView(sections.auditoria, { toAnalyzer: () => go('analizador'), toLab: (o, k) => { lab.prefill(o, k); go('laboratorio'); } });
-    const views = { calculadora: calc, analizador: ana, auditoria: aud, laboratorio: lab };
+    const inv = investigatorView(sections.investigador, { toClassic: () => go('auditoria') });
+    const sta = stationView(sections.estacion, { toClassic: () => go('auditoria'), toInvestigator: (f) => { go('investigador'); if (f)
+            inv.investigate(f); } });
+    const nac = nationalView(sections.nacional, { toStation: (id) => { sta.select(id); go('estacion'); }, toInvestigator: (f) => { go('investigador'); if (f)
+            inv.investigate(f); } });
+    const esp = spectrumView(sections.espectro);
+    const bdd = databaseView(sections.basedatos);
+    const views = { nacional: nac, estacion: sta, investigador: inv, espectro: esp, basedatos: bdd, calculadora: calc, analizador: ana, auditoria: aud, laboratorio: lab };
+    const nationalTabs = ['nacional', 'estacion', 'investigador', 'espectro', 'basedatos'];
+    nat.on(() => { if (nationalTabs.includes(active))
+        views[active]?.render(); });
+    installClassicSync();
+    void nat.init();
     function show() {
         mount(nav, ...TABS.map((t) => h('button', { type: 'button', role: 'tab', class: 'tab' + (t.id === active ? ' on' : ''), 'aria-selected': String(t.id === active), onclick: () => go(t.id) }, t.label)));
         for (const t of TABS)

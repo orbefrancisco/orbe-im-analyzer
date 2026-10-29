@@ -18,6 +18,7 @@ class FakeNode {
     return c;
   }
   remove() { if (this.parentNode) this.parentNode.removeChild(this); }
+  contains(n) { for (let p = n; p; p = p.parentNode) if (p === this) return true; return false; }
   replaceChildren(...nodes) { while (this.firstChild) this.removeChild(this.firstChild); nodes.forEach((n) => this.appendChild(typeof n === 'string' ? new FakeText(n) : n)); }
   get textContent() { return this.childNodes.map((c) => c.textContent).join(''); }
   set textContent(v) { this.replaceChildren(new FakeText(String(v))); }
@@ -87,7 +88,8 @@ class FakeElement extends FakeNode {
     return this._ctx;
   }
   get clientWidth() { return 900; }
-  get files() { return null; }
+  get files() { return this._files ?? null; }
+  set files(v) { this._files = v; }
   get classList() { const self = this; return { contains: (c) => self.className.split(/\s+/).includes(c) }; }
   matches(sel) {
     if (sel.startsWith('#')) return this.id === sel.slice(1);
@@ -112,6 +114,7 @@ export function installDom() {
     documentElement,
     body,
     createElement: (t) => new FakeElement(t),
+    createElementNS: (_ns, t) => new FakeElement(t),
     createTextNode: (t) => new FakeText(t),
     getElementById: (id) => documentElement.querySelector('#' + id),
     querySelector: (s) => documentElement.querySelector(s),
@@ -129,6 +132,18 @@ export function installDom() {
   g.getComputedStyle = () => ({ getPropertyValue: () => '' });
   g.confirm = () => true;
   g.alert = () => {};
+  g.prompt = () => 'motivo de prueba';
+  // fetch de los archivos estáticos de web/ (cartografía)
+  const web = new URL('../../web/', import.meta.url);
+  g.fetch = async (u) => {
+    const { readFile } = await import('node:fs/promises');
+    try {
+      const buf = await readFile(new URL(String(u), web));
+      return { ok: true, status: 200, json: async () => JSON.parse(buf.toString('utf-8')), text: async () => buf.toString('utf-8') };
+    } catch {
+      return { ok: false, status: 404, json: async () => ({}), text: async () => '' };
+    }
+  };
   g.addEventListener = () => {};
   g.HTMLElement = FakeElement;
   const downloads = [];
@@ -149,3 +164,22 @@ export function find(root, tag, text) {
   return r[0];
 }
 export const tick = (ms = 0) => new Promise((r) => setTimeout(r, ms));
+
+/** Archivo de mentira para pickFile(): nombre, contenido y métodos de File. */
+export function fakeFile(name, content) {
+  const bytes = typeof content === 'string' ? new TextEncoder().encode(content) : content;
+  return { name, size: bytes.length, text: async () => new TextDecoder().decode(bytes), arrayBuffer: async () => bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) };
+}
+
+/** Responde al siguiente <input type=file> que la app añada al documento. */
+export async function answerFilePicker(body, file) {
+  for (let i = 0; i < 50; i++) {
+    const inp = body.querySelectorAll('input').find((x) => x.getAttribute('type') === 'file');
+    if (inp) { inp.files = [file]; inp.dispatch('change', { _noBubble: true }); return; }
+    await tick(5);
+  }
+  throw new Error('No apareció el selector de archivos');
+}
+
+/** Ids de todas las secciones de index.html. */
+export const SECTION_IDS = ['project-bar', 'tabs', 'pwa', 'version', 'sec-nacional', 'sec-estacion', 'sec-investigador', 'sec-espectro', 'sec-basedatos', 'sec-calculadora', 'sec-analizador', 'sec-auditoria', 'sec-laboratorio', 'sec-metodo'];

@@ -26,6 +26,15 @@ export function h(tag, attrs = null, ...children) {
     append(el, children);
     return el;
 }
+/** Elemento SVG (los textos se insertan siempre como nodos de texto, nunca como HTML). */
+export function svg(tag, attrs = {}, ...children) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k, v] of Object.entries(attrs))
+        if (v !== undefined && v !== null)
+            el.setAttribute(k, String(v));
+    append(el, children);
+    return el;
+}
 function append(el, children) {
     for (const c of children) {
         if (c === null || c === undefined || c === false)

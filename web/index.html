@@ -29,7 +29,12 @@
   </header>
   <noscript><p class="banner bad">Esta aplicación necesita JavaScript.</p></noscript>
   <main>
-    <section id="sec-calculadora" aria-label="Calculadora"></section>
+    <section id="sec-nacional" aria-label="Panel nacional"></section>
+    <section id="sec-estacion" aria-label="Estación" hidden></section>
+    <section id="sec-investigador" aria-label="Investigador IM" hidden></section>
+    <section id="sec-espectro" aria-label="Espectro RF" hidden></section>
+    <section id="sec-basedatos" aria-label="Base de datos" hidden></section>
+    <section id="sec-calculadora" aria-label="Calculadora" hidden></section>
     <section id="sec-analizador" aria-label="Analizador de banda" hidden></section>
     <section id="sec-auditoria" aria-label="Auditoría espectral" hidden></section>
     <section id="sec-laboratorio" aria-label="Laboratorio RF" hidden></section>
@@ -66,7 +71,17 @@
           <li>Los niveles en dBµV se convierten a dBm suponiendo 50 Ω; los de campo (dBµV/m) o potencia de transmisor (kW) se guardan como texto.</li>
           <li>El análisis de mecanismos indica compatibilidad con los datos, no un diagnóstico, y nunca atribuye una emisión a un transmisor.</li>
         </ul>
-        <h3>8. Privacidad</h3>
+        <h3>8. Sistema nacional de vigilancia</h3>
+        <ul>
+          <li><strong>Cartografía</strong>: 32 divisiones (31 provincias y el Distrito Nacional, códigos ISO 3166-2 DO-01…DO-32) de Natural Earth (dominio público) y 155 municipios de Caribbean GeoPortal (CC BY 4.0), ambos distribuidos por geoBoundaries. No es la cartografía oficial de la ONE; los contornos provinciales son de escala 1:10 000 000 y la fuente municipal (2020) no incluye algunos municipios recientes (p. ej. Oviedo, Baitoa, Sabana Iglesia).</li>
+          <li><strong>Estaciones</strong>: cinco con coordenada histórica documentada (no verificada por GPS) y tres sin confirmar. Para Puerto Plata y Barahona se conserva la coordenada del documento histórico, que la geometría sitúa en San Felipe de Puerto Plata y en Duvergé (Independencia), respectivamente; se muestra en su lugar una referencia aproximada (centroide del municipio descrito) con un radio igual a la distancia máxima del centroide al contorno municipal. Higüey no tiene coordenada conocida.</li>
+          <li><strong>Jacobo — Distrito Nacional</strong>: la región de responsabilidad incluye el Distrito Nacional; la torre (coordenada histórica) está en Santo Domingo Norte, provincia Santo Domingo.</li>
+          <li><strong>Regiones</strong>: ocho regiones administrativas iniciales, una por estación, inspiradas en las regiones de desarrollo. Son configurables por provincia y por municipio y no describen cobertura radioeléctrica.</li>
+          <li><strong>Plausibilidad física</strong>: en los análisis regional y nacional, una combinación entre señales registradas en estaciones distintas es matemáticamente posible pero no necesariamente plausible. Se indica en qué estaciones se registraron todas sus generadoras («coexistencia documentada»); sin ella, la hipótesis es exploratoria. Que una frecuencia no esté registrada en una estación no prueba que no se reciba allí.</li>
+          <li><strong>Frecuencia asignada ≠ señal recibida</strong>: las asignaciones oficiales no cuentan como observaciones ni como generadoras, salvo que el usuario lo active expresamente.</li>
+          <li><strong>Trazabilidad</strong>: los registros nunca se borran (se anulan con motivo); cada cambio queda en su historial y en el registro de auditoría; las copias de seguridad llevan suma SHA-256 y se restauran todo o nada. Los datos de ejemplo se marcan como simulados y se excluyen por defecto.</li>
+        </ul>
+        <h3>9. Privacidad</h3>
         <p>Todo el cálculo se realiza en este navegador. Los proyectos se guardan en el almacenamiento local del navegador; ningún dato se envía a servidores.</p>
       </div>
     </section>

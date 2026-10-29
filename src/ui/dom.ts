@@ -22,6 +22,14 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Attrs | 
   return el;
 }
 
+/** Elemento SVG (los textos se insertan siempre como nodos de texto, nunca como HTML). */
+export function svg(tag: string, attrs: Record<string, string | number | undefined | null> = {}, ...children: Child[]): SVGElement {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag) as SVGElement;
+  for (const [k, v] of Object.entries(attrs)) if (v !== undefined && v !== null) el.setAttribute(k, String(v));
+  append(el, children);
+  return el;
+}
+
 function append(el: Node, children: Child[]): void {
   for (const c of children) {
     if (c === null || c === undefined || c === false) continue;
